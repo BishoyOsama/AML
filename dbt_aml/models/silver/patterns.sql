@@ -3,6 +3,9 @@ SELECT
     CAST(pattern_group_id AS int) AS pattern_group_id,
     pattern_type,
     pattern_metadata,
+    MD5(
+        from_account || '-' || to_account || '-' || timestamp
+    )   AS transaction_sk,
     TO_TIMESTAMP(timestamp, 'YYYY/MM/DD HH24:MI') AS timestamp,
     {{ generate_sk_with_sep('from_account', 'from_bank') }} AS from_bank_account_sk,
     from_bank,

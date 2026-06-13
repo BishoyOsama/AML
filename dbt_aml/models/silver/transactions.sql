@@ -11,6 +11,7 @@ SELECT
     MD5(
         from_account || '-' || to_account || '-' || timestamp
     )   AS transaction_sk,
+    TO_TIMESTAMP(timestamp, 'YYYY/MM/DD HH24:MI') AS transaction_timestamp,
     TO_TIMESTAMP(timestamp, 'YYYY/MM/DD HH24:MI')::DATE AS transaction_date,
     EXTRACT(HOUR FROM TO_TIMESTAMP(timestamp, 'YYYY/MM/DD HH24:MI')) AS transaction_hour,
     EXTRACT(MINUTE FROM TO_TIMESTAMP(timestamp, 'YYYY/MM/DD HH24:MI')) AS transaction_minute,

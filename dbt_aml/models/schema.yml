@@ -51,6 +51,12 @@ models:
       - name: pattern_metadata
         description: additional pattern info
         data_type: string
+      - name: transaction_sk
+        description: unique identifier of the transaction
+        data_type: string
+        tests:
+          - not_null
+          - unique
       - name: timestamp
         description: time and data of when transaction took place
         data_type: timestamp
@@ -127,6 +133,11 @@ models:
         tests:
           - not_null
           - unique
+      - name: transaction_timestamp
+        description: the time and date when transaction took place
+        data_type: timestamp
+        data_tests:
+          - not_null
       - name: transaction_date
         description: the date when transaction took place
         data_type: date
