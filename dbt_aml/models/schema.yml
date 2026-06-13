@@ -130,21 +130,21 @@ models:
       - name: transaction_date
         description: the date when transaction took place
         data_type: date
-        tests:
+        data_tests:
+          - date_format # check for matching date format of 'YYYY-MM-DD' (generic) 
           - not_null
-          # check for custom dbt macro to check date format (YYYY-MM-DD)
       - name: transaction_hour
         description: hour of the transaction in 24 hour format
         data_type: int
-        tests:
+        data_tests:
           - not_null
-          # check range of hours using custom sql test
+          - hour_range # check hour range in 24h format (generic)
       - name: transaction_minute
         description: minute of the transaction when it took place
         data_type: int
-        tests:
+        data_tests:
           - not_null
-          # custom minute range tests in sql
+          - minute_range # custom minute range (generic)
       - name: transaction_day
         description: day name of the transaction
         data_type: string
@@ -187,7 +187,6 @@ models:
         data_type: float
         tests:
           - not_null
-          # check not negative in custom sql
       - name: receiving_currency
         description: currency in which monetary amount received
         data_type: string
@@ -198,7 +197,6 @@ models:
         data_type: float
         tests:
           - not_null
-          # check it is not negative
       - name: payment_currency
         description: currency in which monetary amount is paid
         data_type: string

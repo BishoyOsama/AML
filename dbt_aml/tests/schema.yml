@@ -1,0 +1,9 @@
+version: 2
+
+data_tests:
+  - name: assert_amount_paid_is_positive
+    description: >
+      Transaction out goes amount must be positive, so return records amount_paid < 0 fail the test
+  - name: assert_amount_received_is_positive
+    description: >
+      Transaction received amount must be positive, so return records amount_received < 0 fail the test  

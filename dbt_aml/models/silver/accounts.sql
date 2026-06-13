@@ -1,4 +1,4 @@
-SELECT {{ generate_sk_acc_bank('"Account Number"', '"Bank ID"') }} AS bank_account_surrogate_key,
+SELECT {{ generate_sk_with_sep('"Account Number"', '"Bank ID"') }} AS bank_account_surrogate_key,
     "Account Number" AS account_number,
     "Bank ID" AS bank_id,
     "Bank Name" AS bank_name,
