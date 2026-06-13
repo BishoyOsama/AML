@@ -6,4 +6,7 @@ data_tests:
       Transaction out goes amount must be positive, so return records amount_paid < 0 fail the test
   - name: assert_amount_received_is_positive
     description: >
-      Transaction received amount must be positive, so return records amount_received < 0 fail the test  
+      Transaction received amount must be positive, so return records amount_received < 0 fail the test
+  - name: assert_transaction_date_not_in_future
+    description: >
+      Transaction dates must always be in the past, so return records transaction date > current date fail the test 
