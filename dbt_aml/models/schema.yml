@@ -1,0 +1,234 @@
+version: 2
+
+models:
+  - name: accounts
+    description: transformed & cleaned accounts table
+    columns:
+      - name: bank_account_surrogate_key
+        description: generated surrogate key by hashing (account_number, bank_id) columns
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: account_number
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_id
+        description: bank id associated with the bank
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_name
+        description: bank name
+        data_type: string
+        tests:
+          - not_null
+      - name: entity_id
+        description: entity id
+        data_type: string
+        tests:
+          - not_null
+      - name: entity_name
+        description: entity name
+        data_type: string
+        tests:
+          - not_null
+  - name: patterns
+    description: patterns table that define some laundering patterns
+    columns:
+      - name: pattern_group_id
+        description: pattern identifier column (rows with the same id define a pattern as laundering may consist of more than one transaction)
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_type
+        description: type of the followed laundering pattern
+        data_type: string
+        tests:
+          - not_null
+      - name: pattern_metadata
+        description: additional pattern info
+        data_type: string
+      - name: timestamp
+        description: time and data of when transaction took place
+        data_type: timestamp
+        tests:
+          - not_null
+      - name: from_bank_account_sk
+        description: source bank unique (from_bank_account, from_bank_id) surrogate key
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: source bank identifier of which transactions goes out
+        data_type: string
+        tests:
+          - not_null
+      - name: from_account
+        description: source account identifier of which transactions goes out
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank_account_sk
+        description: destination bank unique (from_bank_account, from_bank_id) surrogate key
+        data_type: string
+        tests:
+          - not_null 
+      - name: to_bank
+        description: destination bank identifier of which transactions goes in
+        data_type: string
+        tests:
+          - not_null
+      - name: to_account
+        description: destination account identifier of which transactions goes in
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_received
+        description: monetary amount received
+        data_type: float
+        tests:
+          - not_null
+      - name: receiving_currency
+        description: currency in which amount received
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_paid
+        description: monetary amount that goes out
+        data_type: float
+        tests:
+          - not_null
+      - name: payment_currency
+        description: currency in which amount goes out
+        data_type: string
+        tests:
+          - not_null
+      - name: payment_format
+        description: format in which the transactions happened
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+                  values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: is_laundering
+        description: labels the transaction if it is laundering or not
+        data_type: boolean
+        tests:
+          - not_null
+  - name: transactions
+    description: "actual IBM synthetic transactions"
+    columns:
+      - name: transaction_sk
+        description: unique transaction surrogate key hash(from_account, -, to_account, -, timestamp)
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: transaction_date
+        description: the date when transaction took place
+        data_type: date
+        tests:
+          - not_null
+          # check for custom dbt macro to check date format (YYYY-MM-DD)
+      - name: transaction_hour
+        description: hour of the transaction in 24 hour format
+        data_type: int
+        tests:
+          - not_null
+          # check range of hours using custom sql test
+      - name: transaction_minute
+        description: minute of the transaction when it took place
+        data_type: int
+        tests:
+          - not_null
+          # custom minute range tests in sql
+      - name: transaction_day
+        description: day name of the transaction
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"]
+      - name: from_account_sk
+        description: identifier of transaction source hash(from_account, -, from_bank)
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: identifier of source bank
+        data_type: string
+        tests:
+          - not_null
+      - name: from_account
+        description: identifier of source account
+        data_type: string
+        tests:
+          - not_null
+      - name: to_account_sk
+        description: identifier of transaction destination hash(to_account, -, to_bank)
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank
+        description: identifier of destination bank
+        data_type: string
+        tests:
+          - not_null
+      - name: to_account
+        description: identifier of destination account
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_received
+        description: monetary amount received
+        data_type: float
+        tests:
+          - not_null
+          # check not negative in custom sql
+      - name: receiving_currency
+        description: currency in which monetary amount received
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_paid
+        description: currency in which monetary amount is paid
+        data_type: float
+        tests:
+          - not_null
+          # check it is not negative
+      - name: payment_currency
+        description: currency in which monetary amount is paid
+        data_type: string
+        tests:
+          - not_null
+      - name: payment_format
+        description: format in which the transactions happened
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: is_cross_currency
+        description: label flag to indicate if receiving_currency != payment_currency
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_cross_border
+        description: label flag to indicate if from_bank != to_bank
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_laundering
+        description: label flag to indicate if the transaction is classified as laundering
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]

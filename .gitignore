@@ -1,0 +1,9 @@
+logs
+.vscode
+airflow\.env
+airflow\README.md
+dbt_aml/logs
+dbt_aml\README.md
+env_dbt
+Datasets
+dbt_aml\dbt_packages

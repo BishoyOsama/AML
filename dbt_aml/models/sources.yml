@@ -1,0 +1,172 @@
+version: 2
+
+sources:
+  - name: raw
+    database: AML
+    schema: BRONZE
+    tables:
+      - name: transactions
+        description: transactions table which includes transactions with a relatively higher illicit ratio (more laundering) of =~ 32M rows
+        columns:
+          - name: TIMESTAMP
+            description: Date & time when transaction took place
+            data_type: string
+            tests:
+              - not_null
+          - name: FROM_BANK
+            description: bank_id making the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: FROM_ACCOUNT
+            description: account from which money deduction takes place (account that transfers the money)
+            data_type: string
+            tests:
+              - not_null
+          - name: TO_BANK
+            description: bank_id receiving the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: TO_ACCOUNT
+            description: account receiving the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: AMOUNT_RECEIVED
+            description: Monetary amount received by the account
+            data_type: string
+            tests:
+              - not_null
+          - name: RECEIVING_CURRENCY
+            description: Currency type in which the receiving account accepts
+            data_type: string
+            tests:
+              - not_null
+          - name: AMOUNT_PAID
+            description: Monetary amount paid (transferred)
+            data_type: string
+            tests:
+              - not_null
+          - name: PAYMENT_CURRENCY
+            description: Currency in which monetary amount is paid
+            data_type: string
+            tests:
+              - not_null
+          - name: PAYMENT_FORMAT
+            description: How transaction was conducted
+            data_type: string
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+          - name: IS_LAUNDERING
+            description: Indicates the transaction was flagged as laundering  or not (1 = laundering, 0 = not laundering)
+            data_type: string
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [1, 0]
+      - name: patterns
+        description: Laundering pattern type scenarios
+        columns:
+          - name: PATTERN_GROUP_ID
+            description: pattern with same ids indicating begin and end of transaction scenario reflecting laundering pattern type
+            data_type: string
+            tests:
+              - not_null
+          - name: PATTERN_TYPE
+            description: Laundering pattern type name
+            data_type: string
+            tests:
+              - not_null
+          - name: PATTERN_METADATA
+            description: Pattern extra info
+            data_type: string
+          - name: TIMESTAMP
+            description: Date & time when transaction took place
+            data_type: string
+            tests:
+              - not_null
+          - name: FROM_BANK
+            description: bank_id making the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: FROM_ACCOUNT
+            description: account from which money deduction takes place (account that transfers the money)
+            data_type: string
+            tests:
+              - not_null
+          - name: TO_BANK
+            description: bank_id receiving the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: TO_ACCOUNT
+            description: account receiving the transaction
+            data_type: string
+            tests:
+              - not_null
+          - name: AMOUNT_RECEIVED
+            description: Monetary amount received by the account
+            data_type: string
+            tests:
+              - not_null
+          - name: RECEIVING_CURRENCY
+            description: Currency type in which the receiving account accepts
+            data_type: string
+            tests:
+              - not_null
+          - name: AMOUNT_PAID
+            description: Monetary amount paid (transferred)
+            data_type: string
+            tests:
+              - not_null
+          - name: PAYMENT_CURRENCY
+            description: Currency in which monetary amount is paid
+            data_type: string
+            tests:
+              - not_null
+          - name: PAYMENT_FORMAT
+            description: How transaction was conducted
+            data_type: string
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+          - name: IS_LAUNDERING
+            description: Indicates the transaction was flagged as laundering  or not (1 = laundering, 0 = not laundering)
+            data_type: string
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [1, 0]
+      - name: accounts
+        description: table containing bank data and account number
+        columns:
+          - name: '"Bank Name"'
+            description: Bank name (country where bank locates //#number)
+            data_type: string
+            tests:
+              - not_null
+          - name: '"Bank ID"'
+            description: Bank id
+            data_type: string
+            tests:
+              - not_null
+          - name: '"Account Number"'
+            description: account number
+            data_type: string
+            tests:
+              - not_null
+          - name: '"Entity ID"'
+            description: entity id
+            data_type: string
+            tests:
+              - not_null
+          - name: '"Entity Name"'
+            description: Entity Name
+            data_type: string
+            tests:
+              - not_null
