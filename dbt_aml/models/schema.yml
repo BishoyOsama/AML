@@ -296,6 +296,121 @@ models:
         data_type: string
         tests:
           - not_null
+  - name: dim_bank_accounts
+    description: Dimension table of bank accounts
+    columns:
+      - name: bank_account_surrogate_key
+        description: unique identifier of bank account
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: account_number
+        description: account number associated with the bank
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_id
+        description: bank identifier
+        data_type: string
+        tests:
+          - not_null
+  - name: dim_entity
+    description: Dimension table of entities
+    columns:
+      - name: entity_id
+        description: entity unique identifier
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: entity_name
+        description: name of the entity
+        data_type: string
+        tests:
+          - not_null
+          - unique
+  - name: dim_payment_formats
+    description: Dimension table containing different payment formats and it's description
+    columns:
+      - name: payment_format
+        description: payment format
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: description
+        description: payment format description
+        data_type: string
+  - name: dim_date
+    description: Dimension date table
+    columns:
+      - name: date_time_sk
+        description: timestamp used as surrogate key
+        data_type: timestamp
+        tests:
+          - not_null
+          - unique
+      - name: date
+        description: Date column with no timestamp
+        data_type: date
+        tests:
+          - not_null
+      - name: hour
+        description: hour of the associated timestamp
+        data_type: int
+        tests:
+          - not_null
+      - name: minute
+        description: minute of the associated timestamp
+        data_type: int
+        tests:
+          - not_null
+      - name: day_name
+        description: Day name (e.g. Sun)
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      - name: is_weekend
+        description: Determines wether the day is weekend or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: week_of_year
+        description: number of week in the associated year
+        data_type: int
+        tests:
+          - not_null
+      - name: month
+        description: month number
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: month_name
+        description: month name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      - name: quarter
+        description: quarter where the month falls
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: year
+        description: Date year
+        data_type: int
+        tests:
+          - not_null
 
 
   

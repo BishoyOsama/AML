@@ -1,0 +1,8 @@
+﻿payment_format,description
+Credit Card,Credit card transfer
+ACH,Automated Clearing House transfer
+Reinvestment,Funds movement
+Wire,Wire transfer
+Bitcoin,Cryptocurrency transfer
+Cheque,Paper cheque
+Cash,Cash transaction

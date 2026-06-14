@@ -49,3 +49,7 @@ models:
       +database: AML
       +schema: MARTS
       +snowflake_warehouse: COMPUTE_WH
+seeds:
+  dbt_aml:
+    dim_payment_formats:
+      +schema: gold
