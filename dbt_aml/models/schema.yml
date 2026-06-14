@@ -241,3 +241,61 @@ models:
           - not_null
           - accepted_values:
               values: [TRUE, FALSE]
+      
+
+  # GOLD 
+  - name: dim_patterns
+    description: Dimension table of laundering patterns
+    columns:
+      - name: pattern_group_id
+        description: unique identifier of pattern type
+        data_type: int
+        tests:
+          - not_null
+          - unique
+      - name: pattern_type
+        description: laundering pattern type name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["SCATTER-GATHER", "FAN-IN", "BIPARTITE", "CYCLE", "GATHER-SCATTER", "RANDOM", "STACK", "FAN-OUT"]
+      - name: pattern_metadata
+        description: more info about the pattern type (more likely a sub-type of pattern type)
+        data_type: string
+      - name: chain_length
+        description: number of cumulative transactions involved in certain laundering behavior
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_start_ts
+        description: start timestamp of series of transactions involved in a laundering behavior
+        data_type: timestamp
+        tests:
+          - not_null
+      - name: pattern_end_ts
+        description: end timestamp of series of transactions involved in a laundering behavior
+        data_type: timestamp
+        tests:
+          - not_null
+      - name: pattern_duration_days
+        description: duration in days of how long certain transactions are done to achieve the laundering behavior
+        data_type: int
+        tests:
+          - not_null
+  - name: dim_banks
+    description: Dimension table of banks information bank id and name
+    columns:
+      - name: bank_id
+        description: unique identifier of the bank
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_name
+        description: bank name
+        data_type: string
+        tests:
+          - not_null
+
+
+  
