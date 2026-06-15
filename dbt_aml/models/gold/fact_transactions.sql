@@ -44,7 +44,7 @@ SELECT
     t.is_cross_currency AS is_cross_currency,
     t.is_cross_border AS is_cross_border,
     t.is_laundering AS is_laundering,
-    p.pattern_group_id AS pattern_group_id,
+    COALESCE(p.pattern_group_id, -1) AS pattern_group_id,
     a.entity_id AS from_entity_id,
     a2.entity_id AS to_entity_id
 FROM transactions t

@@ -234,7 +234,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["SCATTER-GATHER", "FAN-IN", "BIPARTITE", "CYCLE", "GATHER-SCATTER", "RANDOM", "STACK", "FAN-OUT"]
+              values: ["SCATTER-GATHER", "FAN-IN", "BIPARTITE", "CYCLE", "GATHER-SCATTER", "RANDOM", "STACK", "FAN-OUT", "Unclassified"]
       - name: pattern_metadata
         description: more info about the pattern type (more likely a sub-type of pattern type)
         data_type: string
@@ -246,13 +246,9 @@ models:
       - name: pattern_start_ts
         description: start timestamp of series of transactions involved in a laundering behavior
         data_type: timestamp
-        tests:
-          - not_null
       - name: pattern_end_ts
         description: end timestamp of series of transactions involved in a laundering behavior
         data_type: timestamp
-        tests:
-          - not_null
       - name: pattern_duration_days
         description: duration in days of how long certain transactions are done to achieve the laundering behavior
         data_type: int
