@@ -388,10 +388,6 @@ models:
           - not_null
   - name: fact_transactions
     description: fact table includes monetary transactions
-    data_tests:
-      - dbt_utils.expression_is_true:
-          arguments:
-            expression: "amount_paid = amount_received"
     columns:
       - name: transaction_sk
         description: unique identifier of the transaction hash(from_account, to_account)
@@ -480,7 +476,13 @@ models:
               field: payment_format
               to: ref('dim_payment_formats')
       - name: is_cross_currency
-        description: determines if transaction currencies are different or not
+        description: > 
+          determines if transaction currencies are different or not
+          True when payment_currency differs from receiving_currency.
+          Note: amount_paid and amount_received are often numerically
+          identical even when currencies differ — this reflects a
+          simplification in the source data generator, not a real
+          FX conversion. Do not aggregate amounts across currencies.
         data_type: boolean
         tests:
           - not_null
