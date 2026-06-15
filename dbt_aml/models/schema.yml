@@ -17,7 +17,7 @@ models:
           - not_null
       - name: bank_id
         description: bank id associated with the bank
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: bank_name
@@ -69,7 +69,7 @@ models:
           - not_null
       - name: from_bank
         description: source bank identifier of which transactions goes out
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: from_account
@@ -84,7 +84,7 @@ models:
           - not_null 
       - name: to_bank
         description: destination bank identifier of which transactions goes in
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: to_account
@@ -138,31 +138,6 @@ models:
         data_type: timestamp
         data_tests:
           - not_null
-      - name: transaction_date
-        description: the date when transaction took place
-        data_type: date
-        data_tests:
-          - date_format # check for matching date format of 'YYYY-MM-DD' (generic) 
-          - not_null
-      - name: transaction_hour
-        description: hour of the transaction in 24 hour format
-        data_type: int
-        data_tests:
-          - not_null
-          - hour_range # check hour range in 24h format (generic)
-      - name: transaction_minute
-        description: minute of the transaction when it took place
-        data_type: int
-        data_tests:
-          - not_null
-          - minute_range # custom minute range (generic)
-      - name: transaction_day
-        description: day name of the transaction
-        data_type: string
-        tests:
-          - not_null
-          - accepted_values:
-              values: ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"]
       - name: from_account_sk
         description: identifier of transaction source hash(from_account, -, from_bank)
         data_type: string
@@ -170,7 +145,7 @@ models:
           - not_null
       - name: from_bank
         description: identifier of source bank
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: from_account
@@ -185,7 +160,7 @@ models:
           - not_null
       - name: to_bank
         description: identifier of destination bank
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: to_account
@@ -288,7 +263,7 @@ models:
     columns:
       - name: bank_id
         description: unique identifier of the bank
-        data_type: string
+        data_type: int
         tests:
           - not_null
       - name: bank_name
@@ -312,7 +287,7 @@ models:
           - not_null
       - name: bank_id
         description: bank identifier
-        data_type: string
+        data_type: int
         tests:
           - not_null
   - name: dim_entity
@@ -411,6 +386,140 @@ models:
         data_type: int
         tests:
           - not_null
-
-
-  
+  - name: fact_transactions
+    description: fact table includes monetary transactions
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "amount_paid = amount_received"
+    columns:
+      - name: transaction_sk
+        description: unique identifier of the transaction hash(from_account, to_account)
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: transaction_timestamp
+        description: timestamp of the transaction
+        data_type: timestamp
+        tests:
+          - not_null
+          - relationships:
+              field: date_time_sk
+              to: ref('dim_date')
+      - name: from_account_sk
+        description: hash(from_account, -, from_bank) identifier of the sender bank account
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: bank_account_surrogate_key
+              to: ref('dim_bank_accounts')
+      - name: from_account
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: bank id
+        data_type: int
+        tests:
+          - not_null
+          - relationships:
+              field: bank_id
+              to: ref('dim_banks')
+      - name: to_account_sk
+        description: hash(to_account, -, to_bank) identifier of the receiving bank account
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: bank_account_surrogate_key
+              to: ref('dim_bank_accounts')
+      - name: to_account
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank
+        description: bank id
+        data_type: int
+        tests:
+          - not_null
+          - relationships:
+              field: bank_id
+              to: ref('dim_banks')
+      - name: amount_received
+        description: monetary amount received by the receiver account
+        data_type: float
+        data_tests:
+          - not_null
+      - name: receiving_currency
+        description: currency in which monetary amount is received
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_paid
+        description: monetary amount sent by the sender account
+        data_type: float
+        data_tests:
+          - not_null
+      - name: payment_currency
+        description: currency in which the sender sent the monetary amount
+        data_type: string
+        tests:
+          - not_null
+      - name: payment_format
+        description: transaction payment format
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+          - relationships:
+              field: payment_format
+              to: ref('dim_payment_formats')
+      - name: is_cross_currency
+        description: determines if transaction currencies are different or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_cross_border
+        description: determines if the transaction took place in the same bank
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_laundering
+        description: determines if the transaction is considered AML or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: pattern_group_id
+        description: laundering pattern which the transaction belongs to if it is considered AML
+        data_type: int
+        tests:
+          - relationships:
+              field: pattern_group_id
+              to: ref('dim_patterns')
+      - name: from_entity_id
+        description: sender bank entity id
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: entity_id
+              to: ref('dim_entity')
+      - name: to_entity_id
+        description: receiver bank entity id
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: entity_id
+              to: ref('dim_entity')
