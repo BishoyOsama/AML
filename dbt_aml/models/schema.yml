@@ -546,8 +546,8 @@ models:
         data_tests:
           - not_null
           - numeric_value_at_least_zero
-      - name: laundering_rate_percentage
-        description: percentage of laundering transactions in a day
+      - name: laundering_rate
+        description: rate of laundering transactions in a day
         data_type: float
         tests:
           - not_null
@@ -594,8 +594,8 @@ models:
         data_tests:
           - not_null
           - numeric_value_at_least_zero
-      - name: laundering_rate_percentage
-        description: percentage of laundering transactions in a day by currency
+      - name: laundering_rate
+        description: rate of laundering transactions in a day by currency
         data_type: float
         tests:
           - not_null
@@ -718,4 +718,153 @@ models:
         data_type: float
         tests:
           - not_null
-    
+  - name: hourly_transaction_patterns
+    description: this table summarizes transaction metrics in each hour each day
+    columns:
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        data_tests:
+          - not_null
+          - date_format
+      - name: hour
+        description: hour of the day
+        data_type: int
+        data_tests:
+          - not_null
+          - hour_range
+      - name: total_transactions
+        description: total transactions made in an hour 
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: total laundering transactions
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_rate
+        description: rate of laundering transactions in each hour each day
+        data_type: float
+        data_tests:
+          - not_null
+      - name: active_sender_accounts
+        description: number of senders in an hour
+        data_type: int
+        data_tests:
+          - not_null
+      - name: active_receiver_accounts
+        description: number of receivers in an hour
+        data_type: int
+        data_tests:
+          - not_null
+  - name: payment_format_analysis
+    description: summarization of each payment format with each associated metrics
+    columns:
+      - name: payment_format
+        description: payment format (e.g. Wire, ACH, etc....)
+        data_type: string
+        data_tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions made through a type of payment
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: total transactions that are considered anti money laundering made through a type of payment
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_rate
+        description: rate of transactions that are considered anti money laundering made through a type of payment
+        data_type: float
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: bank_flow_matrix
+    description: one row per from_bank, to_bank, and currency. Shows transaction count
+      and total volume sent (in payment_currency) between each bank pair.
+      Powers the bank-to-bank flow visualization.
+    columns:
+      - name: from_bank_id
+        description: bank responsible for initiating the transaction
+        data_type: int
+        tests:
+          - not_null
+      - name: to_bank_id
+        description: bank receiving the transaction
+        data_type: int
+        tests:
+          - not_null
+      - name: currency
+        description: currency in which the transactions happen from the source bank
+        data_type: string
+        tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions made by the source bank
+        data_type: int
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: total_transferred
+        description: total monetary value transferred from the source bank in a associated currency
+        data_type: float
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: patterns_summary
+    description: >
+      Pattern-type-level rollup of laundering activity (count of groups,
+      transactions, avg chain length/duration).
+    columns:
+      - name: pattern_group_id
+        description: pattern group identifier
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_type
+        description: pattern type
+        data_type: string
+        tests:
+          - not_null
+      - name: pattern_metadata
+        description: pattern type meta data (extra info about the type if it has sub-type)
+        data_type: string
+      - name: payment_format
+        description: payment format
+        data_type: string
+        tests:
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: currency
+        description: currency in which these kind of laundering transactions transfer money (the one initiating the transfer)
+        data_type: string
+        tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions by certain pattern, pattern sub-type (pattern_metadata), payment format and currency
+        data_type: int
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: chain_length
+        description: > 
+          number of transactions that are usually associated with a pattern type in order to achieve a laundering behavior
+          NOTE: in case of unclassified pattern type this would be -1
+        data_type: int
+        tests:
+          - not_null
+      - name: duration_days
+        description: > 
+          Duration in days that these transactions took in order to achieve laundering behavior
+          NOTE: in case of unclassified pattern type this would be -1
+        data_type: int
+        tests:
+          - not_null
+              
