@@ -325,18 +325,21 @@ models:
       - name: date
         description: Date column with no timestamp
         data_type: date
-        tests:
+        data_tests:
           - not_null
+          - date_format
       - name: hour
         description: hour of the associated timestamp
         data_type: int
-        tests:
+        data_tests:
           - not_null
+          - hour_range
       - name: minute
         description: minute of the associated timestamp
         data_type: int
-        tests:
+        data_tests:
           - not_null
+          - minute_range
       - name: day_name
         description: Day name (e.g. Sun)
         data_type: string
@@ -521,3 +524,198 @@ models:
           - relationships:
               field: entity_id
               to: ref('dim_entity')
+  # marts
+  - name: daily_summary
+    description: Mart table that describes daily metrics of transactions
+    columns:
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+          - unique
+      - name: total_transactions
+        description: total transactions occurred that day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: number of transactions that are considered anti money laundering
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_rate_percentage
+        description: percentage of laundering transactions in a day
+        data_type: float
+        tests:
+          - not_null
+      - name: active_sender_accounts
+        description: number of senders in that day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: active_receiver_accounts
+        description: number of receivers in that day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: daily_currency_summary
+    description: daily metrics of transactions according to currency used
+    columns:
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+      - name: payment_currency
+        description: in what currency did the transaction happen
+        data_type: string
+        tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions happened on a day by a currency
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: total_transferred
+        description: total monetary amount transferred on a day by a currency
+        data_type: float
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: total transactions that are considered laundering by a currency in a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_rate_percentage
+        description: percentage of laundering transactions in a day by currency
+        data_type: float
+        tests:
+          - not_null
+  - name: account_activity_summary
+    description: table summarizes each bank account metrics but not monetary on each day
+    columns:
+      - name: bank_account_sk
+        description: bank account identifier
+        data_type: string
+        tests:
+          - not_null
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+      - name: transactions_sent
+        description: total transactions sent by a bank account on a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: transactions_received
+        description: total transactions received to a bank account on a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_counterparties_sent_to
+        description: number of unique bank accounts a bank account sent to (transferred money)
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_counterparties_received_from
+        description: number of unique bank accounts a bank account received from (received money)
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_banks_sent_to
+        description: number of unique banks a bank account transferred a monetary value to 
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_banks_received_from
+        description: number of unique banks a bank account received a monetary value from
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: cross_currency_txn_count
+        description: Number of transactions sent or received involving a currency mismatch between the payer and the payee.
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: cross_border_txn_count
+        description: Number of transactions sent or received involved a different bank between the two sides
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_txn_count
+        description: number of transactions that were considered anti money laundering
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: is_flagged_account_day
+        description: boolean identifier of a day that a bank account did not get involved in a laundering behavior
+        data_type: boolean
+        tests:
+          - not_null
+      - name: distinct_payment_formats
+        description: number of unique payment formats a bank account interacted with in a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: distinct_patterns_count
+        description: number of laundering patterns a bank account got involved into in a single day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: account_currency_summary
+    description: table summarizes each bank account monetary ins and outs each day by a currency
+    columns:
+      - name: bank_account_sk
+        description: bank account identifier
+        data_type: string
+        tests:
+          - not_null
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+      - name: currency
+        description: currency in which a bank account sent or received a monetary value
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_transferred
+        description: total monetary amount transferred
+        data_type: float
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: amount_received
+        description: total monetary amount received
+        data_type: float
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: net_flow
+        description: zero if a bank account sent and received same monetary amount in the same currency on the same idea
+        data_type: float
+        tests:
+          - not_null
+    

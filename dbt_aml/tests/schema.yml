@@ -9,4 +9,6 @@ data_tests:
       Transaction received amount must be positive, so return records amount_received < 0 fail the test
   - name: assert_transaction_date_not_in_future
     description: >
-      Transaction dates must always be in the past, so return records transaction date > current date fail the test 
+      Transaction dates must always be in the past, so return records transaction date > current date fail the test
+  - name: assert_account_currency_summary_reconciles
+    
