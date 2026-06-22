@@ -2,7 +2,7 @@
 {{
     config(
         materialized= 'incremental',
-        unique_key= ['transaction_date', 'hour']
+        unique_key= ['transaction_date', 'hour', 'currency', 'payment_format']
     )
 }}
 
@@ -16,11 +16,11 @@ WITH transactions AS (
 SELECT
     transaction_timestamp::DATE AS transaction_date,
     EXTRACT(HOUR FROM transaction_timestamp) AS hour,
+    payment_currency AS currency,
+    payment_format,
     COUNT(*) AS total_transactions,
     SUM(CASE WHEN is_laundering THEN 1 ELSE 0 END) AS laundering_count,
-    ROUND(SUM(CASE WHEN is_laundering THEN 1 ELSE 0 END) / COUNT(*), 6) AS laundering_rate,
-    COUNT(DISTINCT from_account_sk) AS active_sender_accounts,
-    COUNT(DISTINCT to_account_sk) AS active_receiver_accounts
+    SUM(amount_paid)  AS total_transferred
 FROM transactions
-GROUP BY transaction_timestamp::DATE, EXTRACT(HOUR FROM transaction_timestamp)
+GROUP BY transaction_timestamp::DATE, EXTRACT(HOUR FROM transaction_timestamp), payment_currency, payment_format
 ORDER BY transaction_date, hour

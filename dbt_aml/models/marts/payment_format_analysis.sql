@@ -1,5 +1,7 @@
 
 
+/* DEPRECATED (DELETED) */
+
 SELECT
     payment_format,
     COUNT(*) AS total_transactions,

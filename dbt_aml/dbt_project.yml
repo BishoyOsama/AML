@@ -24,7 +24,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 
 vars:
-  run_date: 2022-09-01  #for sake of testing only
+  run_date: 2022-09-02  #for sake of testing only
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 
@@ -52,4 +52,10 @@ models:
 seeds:
   dbt_aml:
     dim_payment_formats:
-      +schema: gold
+      database: AML
+      schema: GOLD
+      snowflake_warehouse: COMPUTE_WH
+    dim_currency:
+      database: AML
+      schema: GOLD
+      snowflake_warehouse: COMPUTE_WH

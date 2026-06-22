@@ -313,8 +313,17 @@ models:
       - name: description
         description: payment format description
         data_type: string
+  - name: dim_currency
+    description: Dimension Currency table
+    columns:
+      - name: currency
+        description: currency name
+        data_type: string
+        tests:
+          - not_null
+          - unique
   - name: dim_date
-    description: Dimension date table
+    description: Dimension date-time table
     columns:
       - name: date_time_sk
         description: timestamp used as surrogate key
@@ -340,6 +349,61 @@ models:
         data_tests:
           - not_null
           - minute_range
+      - name: day_name
+        description: Day name (e.g. Sun)
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      - name: is_weekend
+        description: Determines wether the day is weekend or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: week_of_year
+        description: number of week in the associated year
+        data_type: int
+        tests:
+          - not_null
+      - name: month
+        description: month number
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: month_name
+        description: month name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      - name: quarter
+        description: quarter where the month falls
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: year
+        description: Date year
+        data_type: int
+        tests:
+          - not_null
+  - name: dim_date_no_timestamp
+    description: Dimension date table WITH NO TIMESTAMP
+    columns:
+      - name: date_sk
+        description: date column used as surrogate key
+        data_type: date
+        tests:
+          - not_null
+          - unique
+          - date_format
       - name: day_name
         description: Day name (e.g. Sun)
         data_type: string
@@ -525,80 +589,6 @@ models:
               field: entity_id
               to: ref('dim_entity')
   # marts
-  - name: daily_summary
-    description: Mart table that describes daily metrics of transactions
-    columns:
-      - name: transaction_date
-        description: transaction date
-        data_type: date
-        tests:
-          - not_null
-          - unique
-      - name: total_transactions
-        description: total transactions occurred that day
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: laundering_count
-        description: number of transactions that are considered anti money laundering
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: laundering_rate
-        description: rate of laundering transactions in a day
-        data_type: float
-        tests:
-          - not_null
-      - name: active_sender_accounts
-        description: number of senders in that day
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: active_receiver_accounts
-        description: number of receivers in that day
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-  - name: daily_currency_summary
-    description: daily metrics of transactions according to currency used
-    columns:
-      - name: transaction_date
-        description: transaction date
-        data_type: date
-        tests:
-          - not_null
-      - name: payment_currency
-        description: in what currency did the transaction happen
-        data_type: string
-        tests:
-          - not_null
-      - name: total_transactions
-        description: total transactions happened on a day by a currency
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: total_transferred
-        description: total monetary amount transferred on a day by a currency
-        data_type: float
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: laundering_count
-        description: total transactions that are considered laundering by a currency in a day
-        data_type: int
-        data_tests:
-          - not_null
-          - numeric_value_at_least_zero
-      - name: laundering_rate
-        description: rate of laundering transactions in a day by currency
-        data_type: float
-        tests:
-          - not_null
   - name: account_activity_summary
     description: table summarizes each bank account metrics but not monetary on each day
     columns:
@@ -745,21 +735,6 @@ models:
         data_tests:
           - not_null
           - numeric_value_at_least_zero
-      - name: laundering_rate
-        description: rate of laundering transactions in each hour each day
-        data_type: float
-        data_tests:
-          - not_null
-      - name: active_sender_accounts
-        description: number of senders in an hour
-        data_type: int
-        data_tests:
-          - not_null
-      - name: active_receiver_accounts
-        description: number of receivers in an hour
-        data_type: int
-        data_tests:
-          - not_null
   - name: payment_format_analysis
     description: summarization of each payment format with each associated metrics
     columns:
