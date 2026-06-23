@@ -518,6 +518,9 @@ models:
         data_type: string
         tests:
           - not_null
+          - relationships:
+              field: currency
+              to: ref('dim_currency')
       - name: amount_paid
         description: monetary amount sent by the sender account
         data_type: float
@@ -528,6 +531,9 @@ models:
         data_type: string
         tests:
           - not_null
+          - relationships:
+              field: currency
+              to: ref('dim_currency')
       - name: payment_format
         description: transaction payment format
         data_type: string
