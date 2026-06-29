@@ -54,7 +54,7 @@ jobs:
                          database: "${{ env.SNOWFLAKE_DATABASE }}"
                          password: "${{ env.SNOWFLAKE_PASSWORD }}"
                          role: "${{ env.SNOWFLAKE_ROLE }}"
-                         schema: silver
+                         schema: default
                          threads: 1
                          type: snowflake
                          user: "${{ env.SNOWFLAKE_USER }}"
@@ -119,7 +119,7 @@ jobs:
             
             
 
-            - name: Install Airflow & Cosmos
+            - name: Install Airflow & Cosmos & DBT
               run: |
                 pip install \
                   apache-airflow \
@@ -127,11 +127,11 @@ jobs:
                   apache-airflow-providers-snowflake \
                   dbt-core==1.11.11
             
-            - name: dbt deps
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
-
             
             - name: DAG import check
+              env:
+                DBT_PROJECT_DIRECTORY: ${{ github.workspace }}/airflow/dags/dbt/dbt_aml
+                DBT_VENV: dbt
               run: |
                 python -c "
                 from airflow.models import DagBag

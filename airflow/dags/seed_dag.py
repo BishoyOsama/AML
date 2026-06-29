@@ -7,9 +7,9 @@ from cosmos.profiles import SnowflakeUserPasswordProfileMapping
 from cosmos.constants import LoadMode, ExecutionMode
 
 
-PROJECT_DIR = "/usr/local/airflow/dags/dbt/dbt_aml"
-DBT_VENV_PATH = "/usr/local/airflow/dbt_venv/bin/dbt_aml"
-MANIFEST_PATH  = "/usr/local/airflow/dags/dbt/dbt_aml/target/manifest.json"
+PROJECT_DIR = os.getenv("DBT_PROJECT_DIRECTORY", "/usr/local/airflow/dags/dbt/dbt_aml")
+DBT_VENV_PATH = os.getenv("DBT_VENV", "/usr/local/airflow/dbt_venv/bin/dbt_aml")
+MANIFEST_PATH  = os.getenv("DBT_MANIFEST", "/usr/local/airflow/dags/dbt/dbt_aml/target/manifest.json")
 
 profile_config = ProfileConfig(
     profile_name="dbt_aml",
