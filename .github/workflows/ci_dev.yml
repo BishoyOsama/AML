@@ -117,6 +117,11 @@ jobs:
                 restore-keys: |
                     ${{ runner.os }}-pip-airflow-
             
+            
+            - name: dbt deps
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+            
+              
             - name: Install Airflow & Cosmos
               run: |
                 pip install \
@@ -124,6 +129,7 @@ jobs:
                   astronomer-cosmos \
                   apache-airflow-providers-snowflake \
                   dbt-core==1.11.11
+
             
             - name: DAG import check
               run: |
