@@ -132,6 +132,7 @@ jobs:
               env:
                 DBT_PROJECT_DIRECTORY: ${{ github.workspace }}/airflow/dags/dbt/dbt_aml
                 DBT_VENV: dbt
+                DBT_MANIFEST: ${{ github.workspace }}/airflow/dags/dbt/dbt_aml/target/manifest.json
               run: |
                 python -c "
                 from airflow.models import DagBag
