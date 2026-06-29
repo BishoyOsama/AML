@@ -133,14 +133,9 @@ jobs:
                   apache-airflow \
                   astronomer-cosmos \
                   apache-airflow-providers-snowflake \
-                  dbt-core==1.11.11
+                  dbt-core==1.11.11 \
+                  dbt-snowflake==1.11.5
             
-            - name: dbt deps
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
-
-            - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
-
             - name: Write dev profiles.yml
               run: |
                 cat > ./airflow/dags/dbt/dbt_aml/profiles.yml << EOF
@@ -158,6 +153,13 @@ jobs:
                          warehouse: "${{ env.SNOWFLAKE_WAREHOUSE }}"
                     target: dev
                 EOF
+            - name: dbt deps
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+
+            - name: dbt compile
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+
+            
             
             
             - name: DAG import check
