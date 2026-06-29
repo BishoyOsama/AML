@@ -46,6 +46,7 @@ jobs:
             # Create profiles.yml file
             - name: Write dev profiles.yml
               run: |
+                cd ./airflow/dags/dbt/dbt_aml
                 cat > ./airflow/dags/dbt/dbt_aml/profiles.yml << EOF
                 dbt_aml:
                     outputs:
@@ -66,7 +67,7 @@ jobs:
               run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
             - name: dbt compile
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
             # download manifest.json file from production environment (main branch)
             - name: Download prod manifest from cd workflow
@@ -131,7 +132,7 @@ jobs:
               run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
             - name: dbt compile
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
             
             
             - name: DAG import check
