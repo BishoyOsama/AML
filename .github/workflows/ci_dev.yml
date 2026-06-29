@@ -159,26 +159,10 @@ jobs:
             - name: dbt compile
               run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
+            # install astro cli
+            - name: Install Astro CLI
+              run: astronomer/setup-astro-cli@v0.0.1
             
-            
-            
-            - name: DAG import check
-              env:
-                DBT_PROJECT_DIRECTORY: ${{ github.workspace }}/airflow/dags/dbt/dbt_aml
-                DBT_VENV: dbt
-                DBT_MANIFEST: ${{ github.workspace }}/airflow/dags/dbt/dbt_aml/target/manifest.json
-              run: |
-                python -c "
-                from airflow.models import DagBag
-
-                dagbag = DagBag(dag_folder='airflow/dags', include_examples=False)
-
-                if dagbag.import_errors:
-                    print('DAG import errors found: ')
-                    for dag_file, error in dagbag.import_errors.items():
-                        print(f' {dag_file}: {error}')
-                    
-                    exit(1)
-                
-                print('All DAGs imported cleanly: ', list(dagbag.dags.keys()))
-                "
+              # parse dbt dags (using compiled manifest file)
+            - name: Parse DBT DAGs
+              run: astro dev parse
