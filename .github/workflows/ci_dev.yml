@@ -165,4 +165,6 @@ jobs:
             
               # parse dbt dags (using compiled manifest file)
             - name: Parse DBT DAGs
-              run: astro dev parse
+              run: |
+                cd ./airflow/ 
+                astro dev parse
