@@ -161,7 +161,7 @@ jobs:
 
             # install astro cli
             - name: Install Astro CLI
-              run: astronomer/setup-astro-cli@v0.0.1
+              uses: astronomer/setup-astro-cli@v0.0.1
             
               # parse dbt dags (using compiled manifest file)
             - name: Parse DBT DAGs
