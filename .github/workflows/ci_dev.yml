@@ -99,6 +99,14 @@ jobs:
     airflow-dev:
         name: Airflow DAG import check
         runs-on: ubuntu-latest
+        environment: dev
+        env:
+            SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+            SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+            SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+            SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+            SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+            SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
 
         steps:
             - name: Checkout branch (get branch code)
@@ -132,6 +140,24 @@ jobs:
 
             - name: dbt compile
               run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+
+            - name: Write dev profiles.yml
+              run: |
+                cat > ./airflow/dags/dbt/dbt_aml/profiles.yml << EOF
+                dbt_aml:
+                    outputs:
+                        dev:
+                         account: "${{ env.SNOWFLAKE_ACCOUNT }}"
+                         database: "${{ env.SNOWFLAKE_DATABASE }}"
+                         password: "${{ env.SNOWFLAKE_PASSWORD }}"
+                         role: "${{ env.SNOWFLAKE_ROLE }}"
+                         schema: default
+                         threads: 1
+                         type: snowflake
+                         user: "${{ env.SNOWFLAKE_USER }}"
+                         warehouse: "${{ env.SNOWFLAKE_WAREHOUSE }}"
+                    target: dev
+                EOF
             
             
             - name: DAG import check
