@@ -1,0 +1,143 @@
+# CI workflow for running tests and integrations on dev branch
+
+name: CI - dev branch
+on:
+    push:
+        branches:
+            - dev
+        paths:
+            - "airflow/dags/**"
+            - "airflow/dags/dbt/dbt_aml/**"
+            - "airflow/requirements.txt"
+
+
+jobs:
+    dbt-dev:
+        name: dbt compile + tests (only modified)
+        runs-on: ubuntu-latest
+        environment: dev
+        env:
+            SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+            SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+            SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+            SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+            SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+            SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+        steps:
+            - name: Checkout branch (get branch code)
+              uses: actions/checkout@v4
+
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Cache dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/requirements.txt') }}
+                restore-keys: |
+                    ${{ runner.os }}-pip-dbt-
+
+            - name: Install dbt
+              run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
+            
+            # Create profiles.yml file
+            - name: Write dev profiles.yml
+              run: |
+                cat > ./airflow/dags/dbt/dbt_aml/profiles.yml << EOF
+                dbt_aml:
+                    outputs:
+                        dev:
+                         account: "${{ env.SNOWFLAKE_ACCOUNT }}"
+                         database: "${{ env.SNOWFLAKE_DATABASE }}"
+                         password: "${{ env.SNOWFLAKE_PASSWORD }}"
+                         role: "${{ env.SNOWFLAKE_ROLE }}"
+                         schema: silver
+                         threads: 1
+                         type: snowflake
+                         user: "${{ env.SNOWFLAKE_USER }}"
+                         warehouse: "${{ env.SNOWFLAKE_WAREHOUSE }}"
+                    target: dev
+                EOF
+
+            - name: dbt deps
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+
+            - name: dbt compile
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+
+            # download manifest.json file from production environment (main branch)
+            - name: Download prod manifest from cd workflow
+              uses: dawidd6/action-download-artifact@v21
+              with:
+                workflow: cd.yml
+                branch: main
+                name: prod-manifest
+                path: ./airflow/dags/dbt/dbt_aml/production_state
+              continue-on-error: true
+
+            # test only on modified tests
+            - name: test modified models only
+              run: |
+                if [ -f ./airflow/dags/dbt/dbt_aml/production_state/manifest.json ]; then
+                    echo "Prod manifest found - running CI tests on changed models only"
+                    dbt test \
+                     --project-dir ./airflow/dags/dbt/dbt_aml/ \
+                     --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
+                     --select state:modified+ \
+                     --defer \
+                     --state ./airflow/dags/dbt/dbt_aml/production_state \
+                     --target dev
+                else
+                    echo "No production manifest found - skipping tests on first dev push"
+                    echo "Tests will run fully on the PR to main"
+                fi
+
+    # airflow DAG import check
+    airflow-dev:
+        name: Airflow DAG import check
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout branch (get branch code)
+              uses: actions/checkout@v4
+
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Cache dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-airflow-${{ hashFiles('./airflow/requirements.txt') }}
+                restore-keys: |
+                    ${{ runner.os }}-pip-airflow-
+            
+            - name: Install Airflow & Cosmos
+              run: |
+                pip install \
+                  apache-airflow \
+                  astronomer-cosmos \
+                  apache-airflow-providers-snowflake \
+                  dbt-core==1.11.11
+            
+            - name: DAG import check
+              run: |
+                python -c "
+                from airflow.models import DagBag
+
+                dagbag = DagBag(dag_folder='airflow/dags', include_examples=False)
+
+                if dagbag.import_errors:
+                    print('DAG import errors found: ')
+                    for dag_file, error in dagbag.import_errors.items():
+                        print(f' {dag_file}: {error}')
+                    
+                    exit(1)
+                
+                print('All DAGs imported cleanly: ', list(dagbag.dags.keys()))
+                "
