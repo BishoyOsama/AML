@@ -101,7 +101,13 @@ jobs:
               run: |
                 if [ -f ./production_state/manifest.json ]; then
                     echo "Prod manifest found - running CI tests on changed models only"
-                    dbt test --project-dir ./airflow/dags/dbt/dbt_aml/ --profiles-dir ./airflow/dags/dbt/dbt_aml/ --select state:modified+ --state ./production_state --defer --target dev
+                    dbt test \
+                     --project-dir ./airflow/dags/dbt/dbt_aml/ \
+                     --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
+                     --select state:modified+ \
+                     --state "$PWD/production_state" \
+                     --defer \
+                     --target dev
                 else
                     echo "No production manifest found - skipping tests on first dev push"
                     echo "Tests will run fully on the PR to main"
