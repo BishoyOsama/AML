@@ -78,6 +78,14 @@ jobs:
                 path: ./airflow/dags/dbt/dbt_aml/production_state
               continue-on-error: true
 
+            
+            - name: Debug — show production_state contents
+              run: |
+                echo "=== production_state directory ==="
+                find ./airflow/dags/dbt/dbt_aml/production_state -type f 2>/dev/null || echo "Directory does not exist"
+                echo "=================================="
+              continue-on-error: true
+
             # test only on modified tests
             - name: test modified models only
               run: |
@@ -155,10 +163,10 @@ jobs:
                 EOF
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             # install astro cli
             - name: Install Astro CLI
