@@ -40,7 +40,6 @@ jobs:
                 key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
 
             - name: Install dbt & dbt-snowflake
-              if: steps.dbt_cache.outputs.cache-hit != 'true'
               run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
             
             # Create profiles.yml file
@@ -63,6 +62,7 @@ jobs:
                 EOF
 
             - name: dbt deps
+              if: steps.dbt_cache.outputs.cache-hit != 'true'
               run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
             - name: dbt compile
@@ -126,7 +126,6 @@ jobs:
                 key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
 
             - name: Install dbt & dbt-snowflake
-              if: steps.dbt_cache.outputs.cache-hit != 'true'
               run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
             
             - name: Install Airflow & Cosmos 
@@ -155,6 +154,7 @@ jobs:
                     target: dev
                 EOF
             - name: dbt deps
+              if: steps.dbt_cache.outputs.cache-hit != 'true'
               run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
 
             - name: dbt compile

@@ -7,7 +7,8 @@ from cosmos.profiles import SnowflakeUserPasswordProfileMapping
 from cosmos.constants import LoadMode, ExecutionMode
 
 
-""" OS ENV FOR AIRFLOW GITHUB ACTIONS """
+""" OS ENV FOR AIRFLOW GITHUB ACTIONS. 
+    FOR DAGBAG CUSTOM PYTHON SCRIPT BUT NOT NEEDED IF USING ASTRO COMMANDS"""
 
 PROJECT_DIR = os.getenv("DBT_PROJECT_DIRECTORY", "/usr/local/airflow/dags/dbt/dbt_aml")
 DBT_VENV_PATH = os.getenv("DBT_VENV", "/usr/local/airflow/dbt_venv/bin/dbt_aml")
