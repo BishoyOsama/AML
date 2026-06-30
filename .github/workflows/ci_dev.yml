@@ -36,12 +36,12 @@ jobs:
               id: dbt_cache
               uses: actions/cache@v4
               with:
-                path: ~/.cache/pip
-                key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/requirements.txt') }}
+                path: ./airflow/dags/dbt/dbt_aml/dbt_packages
+                key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
                 restore-keys: |
                     ${{ runner.os }}-pip-dbt-
 
-            - name: Install dbt
+            - name: Install dbt & dbt-snowflake
               if: steps.dbt_cache.outputs.cache-hit != 'true'
               run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
             
@@ -121,23 +121,24 @@ jobs:
             
 
             - name: Cache dependencies
+              id: dbt_cache
               uses: actions/cache@v4
-              id: cache
               with:
-                path: ~/.cache/pip
-                key: ${{ runner.os }}-pip-airflow-${{ hashFiles('./airflow/requirements.txt') }}
+                path: ./airflow/dags/dbt/dbt_aml/dbt_packages
+                key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
                 restore-keys: |
-                    ${{ runner.os }}-pip-airflow-
+                    ${{ runner.os }}-pip-dbt-
+
+            - name: Install dbt & dbt-snowflake
+              if: steps.dbt_cache.outputs.cache-hit != 'true'
+              run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
             
-            - name: Install Airflow & Cosmos & DBT
-              if: steps.cache.outputs.cache-hit != 'true'
+            - name: Install Airflow & Cosmos 
               run: |
                 pip install \
                   apache-airflow \
                   astronomer-cosmos \
-                  apache-airflow-providers-snowflake \
-                  dbt-core==1.11.11 \
-                  dbt-snowflake==1.11.5
+                  apache-airflow-providers-snowflake
             
             
             - name: Write dev profiles.yml
