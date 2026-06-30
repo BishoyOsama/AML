@@ -1,7 +1,7 @@
 # CI workflow for running tests and integrations on dev branch
 
 name: CI - dev branch
-on:
+on: 
     push:
         branches:
             - dev
