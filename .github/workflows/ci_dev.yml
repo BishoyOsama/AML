@@ -87,7 +87,7 @@ jobs:
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
-                     --defer \
+                     --defer \ 
                      --state ./airflow/dags/dbt/dbt_aml/production_state \
                      --target dev
                 else
