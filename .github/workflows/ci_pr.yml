@@ -8,6 +8,9 @@ on:
             - "airflow/dags/**"
             - "airflow/dags/dbt/dbt_aml/**"
             - "airflow/requirements.txt"
+        types:
+          - opened
+          - edited
 
 jobs:
     dbt-slim-ci:
@@ -21,7 +24,7 @@ jobs:
             SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
             SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
             SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-            
+
 
         steps:
             - name: Checkout PR branch
