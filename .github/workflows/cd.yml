@@ -1,0 +1,91 @@
+name: CD - Deployment
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "airflow/dags/**"
+            - "airflow/dags/dbt/dbt_aml/**"
+            - "airflow/requirements.txt"
+
+
+jobs:
+
+    deploy:
+        name: dbt full run on AML_PROD
+        runs-on: ubuntu-latest
+
+        environment: prod
+        env:
+            SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+            SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+            SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+            SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+            SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+            SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+
+        steps:
+            - name: checkout main
+              uses: actions/checkout@v4
+              with:
+                # full history to avoid git commands breaks
+                fetch-depth: 0 
+                token: ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+            
+            - name: Cache dependencies
+              id: dbt_cache
+              uses: actions/cache@v4
+              with:
+                path: ./airflow/dags/dbt/dbt_aml/dbt_packages
+                key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
+            
+            - name: Install dbt & dbt-snowflake
+              run: pip install dbt-core==1.11.11 dbt-snowflake==1.11.5
+
+            - name: Write production profiles.yml
+              run: |
+                cat > ./airflow/dags/dbt/dbt_aml/profiles.yml << EOF
+                dbt_aml:
+                    outputs:
+                        prod:
+                         account: "${{ env.SNOWFLAKE_ACCOUNT }}"
+                         database: "${{ env.SNOWFLAKE_DATABASE }}"
+                         password: "${{ env.SNOWFLAKE_PASSWORD }}"
+                         role: "${{ env.SNOWFLAKE_ROLE }}"
+                         schema: default
+                         threads: 1
+                         type: snowflake
+                         user: "${{ env.SNOWFLAKE_USER }}"
+                         warehouse: "${{ env.SNOWFLAKE_WAREHOUSE }}"
+                    target: prod
+                EOF
+
+
+            - name: dbt deps
+              if: steps.dbt_cache.outputs.cache-hit != 'true'
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+            
+            - name: dbt compile
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+            
+
+            - name: dbt run - full production run
+              run: |
+                dbt run \
+                    --project-dir ./airflow/dags/dbt/dbt_aml/ \
+                    --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
+                    --target prod
+            
+            - name: Store production manifest
+              uses: actions/upload-artifact@v4
+              with:
+                name: prod-manifest
+                path: ./airflow/dags/dbt/dbt_aml/target/manifest.json
+                retention-days: 90
+            
