@@ -82,7 +82,7 @@ jobs:
             - name: Debug — show production_state contents
               run: |
                 echo "=== production_state directory ==="
-                find ./airflow/dags/dbt/dbt_aml/production_state -type f 2>/dev/null || echo "Directory does not exist"
+                ls ./airflow/dags/dbt/dbt_aml/production_state
                 echo "=================================="
               continue-on-error: true
 
