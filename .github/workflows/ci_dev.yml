@@ -99,7 +99,7 @@ jobs:
             # test only on modified tests
             - name: test modified models only
               run: |
-                if [ -f ./airflow/dags/dbt/dbt_aml/production_state/manifest.json ]; then
+                if [ -f ./production_state/manifest.json ]; then
                     echo "Prod manifest found - running CI tests on changed models only"
                     dbt test \
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
