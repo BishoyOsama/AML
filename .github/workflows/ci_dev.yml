@@ -63,10 +63,10 @@ jobs:
 
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             # download manifest.json file from production environment (main branch)
             - name: Download prod manifest from cd workflow
@@ -75,20 +75,21 @@ jobs:
                 workflow: cd.yml
                 branch: main
                 name: prod-manifest
-                path: ./airflow/dags/dbt/dbt_aml/production_state
+                path: ./production_state
               continue-on-error: true
+
 
             # test only on modified tests
             - name: test modified models only
               run: |
-                if [ -f ./airflow/dags/dbt/dbt_aml/production_state/manifest.json ]; then
+                if [ -f ./production_state/manifest.json ]; then
                     echo "Prod manifest found - running CI tests on changed models only"
                     dbt test \
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
-                     --defer \ 
-                     --state ./airflow/dags/dbt/dbt_aml/production_state \
+                     --state "$PWD/production_state" \
+                     --defer \
                      --target dev
                 else
                     echo "No production manifest found - skipping tests on first dev push"
@@ -155,10 +156,10 @@ jobs:
                 EOF
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             # install astro cli
             - name: Install Astro CLI

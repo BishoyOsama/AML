@@ -69,10 +69,10 @@ jobs:
 
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target prod
             
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target prod
             
 
             - name: dbt run - full production run
