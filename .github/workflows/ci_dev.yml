@@ -86,6 +86,16 @@ jobs:
                 echo "=================================="
               continue-on-error: true
 
+            - name: Check manifest dbt version
+              run: |
+                python3 -c "
+                import json
+                with open('./airflow/dags/dbt/dbt_aml/production_state/manifest.json') as f:
+                    m = json.load(f)
+                print('Manifest dbt version:', m.get('metadata', {}).get('dbt_version', 'not found'))
+                print('Manifest schema version:', m.get('metadata', {}).get('dbt_schema_version', 'not found'))
+                "
+
             # test only on modified tests
             - name: test modified models only
               run: |
@@ -96,7 +106,7 @@ jobs:
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
                      --defer \
-                     --state ./airflow/dags/dbt/dbt_aml/production_state/production_state \
+                     --state ./airflow/dags/dbt/dbt_aml/production_state/ \
                      --target dev
                 else
                     echo "No production manifest found - skipping tests on first dev push"
