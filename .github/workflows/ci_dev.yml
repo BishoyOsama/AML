@@ -38,8 +38,6 @@ jobs:
               with:
                 path: ./airflow/dags/dbt/dbt_aml/dbt_packages
                 key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
-                restore-keys: |
-                    ${{ runner.os }}-pip-dbt-
 
             - name: Install dbt & dbt-snowflake
               if: steps.dbt_cache.outputs.cache-hit != 'true'
@@ -126,8 +124,6 @@ jobs:
               with:
                 path: ./airflow/dags/dbt/dbt_aml/dbt_packages
                 key: ${{ runner.os }}-pip-dbt-${{ hashFiles('./airflow/dags/dbt/dbt_aml/package-lock.yml') }}
-                restore-keys: |
-                    ${{ runner.os }}-pip-dbt-
 
             - name: Install dbt & dbt-snowflake
               if: steps.dbt_cache.outputs.cache-hit != 'true'
