@@ -67,6 +67,7 @@ jobs:
             - name: dbt compile
               run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
             
+            
             - name: Download prod manifest from cd workflow
               uses: dawidd6/action-download-artifact@v21
               with:
