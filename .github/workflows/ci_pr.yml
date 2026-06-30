@@ -66,10 +66,10 @@ jobs:
             
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
             
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
             
             
             - name: Download prod manifest from cd workflow
@@ -90,7 +90,7 @@ jobs:
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
-                     --defer \ 
+                     --defer \
                      --state ./airflow/dags/dbt/dbt_aml/production_state \
                      --target dev
                 else
@@ -109,7 +109,7 @@ jobs:
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
-                     --defer \ 
+                     --defer \
                      --state ./airflow/dags/dbt/dbt_aml/production_state \
                      --target dev
                 else
@@ -190,10 +190,10 @@ jobs:
                 EOF
             - name: dbt deps
               if: steps.dbt_cache.outputs.cache-hit != 'true'
-              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt deps --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             - name: dbt compile
-              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml
+              run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target dev
 
             # install astro cli
             - name: Install Astro CLI
