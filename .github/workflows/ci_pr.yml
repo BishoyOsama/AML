@@ -78,20 +78,20 @@ jobs:
                 workflow: cd.yml
                 branch: main
                 name: prod-manifest
-                path: ./airflow/dags/dbt/dbt_aml/production_state
+                path: ./production_state
               continue-on-error: true
 
             
             - name: dbt run modified models only
               run: |
-                if [ -f ./airflow/dags/dbt/dbt_aml/production_state/manifest.json ]; then
+                if [ -f ./production_state/manifest.json ]; then
                     echo "Prod manifest found - running slim CI on changed models  + downstream models only"
                     dbt run \
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
                      --defer \
-                     --state ./airflow/dags/dbt/dbt_aml/production_state/ \
+                     --state "$PWD/production_state" \
                      --target dev
                 else
                     echo "No production manifest found - skipping slim CI on first PR - running full dbt run"
@@ -103,14 +103,14 @@ jobs:
             
             - name: dbt test modified models only
               run: |
-                if [ -f ./airflow/dags/dbt/dbt_aml/production_state/manifest.json ]; then
+                if [ -f ./production_state/manifest.json ]; then
                     echo "Prod manifest found - running CI tests on changed models + downstream models only"
                     dbt test \
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
                      --defer \
-                     --state ./airflow/dags/dbt/dbt_aml/production_state/ \
+                     --state "$PWD/production_state" \
                      --target dev
                 else
                     echo "No production manifest found - skipping slim CI tests on first PR"
