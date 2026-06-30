@@ -1,0 +1,851 @@
+version: 2
+
+models:
+  - name: accounts
+    description: transformed & cleaned accounts table
+    columns:
+      - name: bank_account_surrogate_key
+        description: generated surrogate key by hashing (account_number, bank_id) columns
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: account_number
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_id
+        description: bank id associated with the bank
+        data_type: int
+        tests:
+          - not_null
+      - name: bank_name
+        description: bank name
+        data_type: string
+        tests:
+          - not_null
+      - name: entity_id
+        description: entity id
+        data_type: string
+        tests:
+          - not_null
+      - name: entity_name
+        description: entity name
+        data_type: string
+        tests:
+          - not_null
+  - name: patterns
+    description: patterns table that define some laundering patterns
+    columns:
+      - name: pattern_group_id
+        description: pattern identifier column (rows with the same id define a pattern as laundering may consist of more than one transaction)
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_type
+        description: type of the followed laundering pattern
+        data_type: string
+        tests:
+          - not_null
+      - name: pattern_metadata
+        description: additional pattern info
+        data_type: string
+      - name: transaction_sk
+        description: unique identifier of the transaction
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: timestamp
+        description: time and data of when transaction took place
+        data_type: timestamp
+        tests:
+          - not_null
+      - name: from_bank_account_sk
+        description: source bank unique (from_bank_account, from_bank_id) surrogate key
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: source bank identifier of which transactions goes out
+        data_type: int
+        tests:
+          - not_null
+      - name: from_account
+        description: source account identifier of which transactions goes out
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank_account_sk
+        description: destination bank unique (from_bank_account, from_bank_id) surrogate key
+        data_type: string
+        tests:
+          - not_null 
+      - name: to_bank
+        description: destination bank identifier of which transactions goes in
+        data_type: int
+        tests:
+          - not_null
+      - name: to_account
+        description: destination account identifier of which transactions goes in
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_received
+        description: monetary amount received
+        data_type: float
+        tests:
+          - not_null
+      - name: receiving_currency
+        description: currency in which amount received
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_paid
+        description: monetary amount that goes out
+        data_type: float
+        tests:
+          - not_null
+      - name: payment_currency
+        description: currency in which amount goes out
+        data_type: string
+        tests:
+          - not_null
+      - name: payment_format
+        description: format in which the transactions happened
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+                  values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: is_laundering
+        description: labels the transaction if it is laundering or not
+        data_type: boolean
+        tests:
+          - not_null
+  - name: transactions
+    description: "actual IBM synthetic transactions"
+    columns:
+      - name: transaction_sk
+        description: unique transaction surrogate key hash(from_account, -, to_account, -, timestamp)
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: transaction_timestamp
+        description: the time and date when transaction took place
+        data_type: timestamp
+        data_tests:
+          - not_null
+      - name: from_account_sk
+        description: identifier of transaction source hash(from_account, -, from_bank)
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: identifier of source bank
+        data_type: int
+        tests:
+          - not_null
+      - name: from_account
+        description: identifier of source account
+        data_type: string
+        tests:
+          - not_null
+      - name: to_account_sk
+        description: identifier of transaction destination hash(to_account, -, to_bank)
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank
+        description: identifier of destination bank
+        data_type: int
+        tests:
+          - not_null
+      - name: to_account
+        description: identifier of destination account
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_received
+        description: monetary amount received
+        data_type: float
+        tests:
+          - not_null
+      - name: receiving_currency
+        description: currency in which monetary amount received
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_paid
+        description: currency in which monetary amount is paid
+        data_type: float
+        tests:
+          - not_null
+      - name: payment_currency
+        description: currency in which monetary amount is paid
+        data_type: string
+        tests:
+          - not_null
+      - name: payment_format
+        description: format in which the transactions happened
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: is_cross_currency
+        description: label flag to indicate if receiving_currency != payment_currency
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_cross_border
+        description: label flag to indicate if from_bank != to_bank
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_laundering
+        description: label flag to indicate if the transaction is classified as laundering
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      
+
+  # GOLD 
+  - name: dim_patterns
+    description: Dimension table of laundering patterns
+    columns:
+      - name: pattern_group_id
+        description: unique identifier of pattern type
+        data_type: int
+        tests:
+          - not_null
+          - unique
+      - name: pattern_type
+        description: laundering pattern type name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["SCATTER-GATHER", "FAN-IN", "BIPARTITE", "CYCLE", "GATHER-SCATTER", "RANDOM", "STACK", "FAN-OUT", "Unclassified"]
+      - name: pattern_metadata
+        description: more info about the pattern type (more likely a sub-type of pattern type)
+        data_type: string
+      - name: chain_length
+        description: number of cumulative transactions involved in certain laundering behavior
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_start_ts
+        description: start timestamp of series of transactions involved in a laundering behavior
+        data_type: timestamp
+      - name: pattern_end_ts
+        description: end timestamp of series of transactions involved in a laundering behavior
+        data_type: timestamp
+      - name: pattern_duration_days
+        description: duration in days of how long certain transactions are done to achieve the laundering behavior
+        data_type: int
+        tests:
+          - not_null
+  - name: dim_banks
+    description: Dimension table of banks information bank id and name
+    columns:
+      - name: bank_id
+        description: unique identifier of the bank
+        data_type: int
+        tests:
+          - not_null
+      - name: bank_name
+        description: bank name
+        data_type: string
+        tests:
+          - not_null
+  - name: dim_bank_accounts
+    description: Dimension table of bank accounts
+    columns:
+      - name: bank_account_surrogate_key
+        description: unique identifier of bank account
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: account_number
+        description: account number associated with the bank
+        data_type: string
+        tests:
+          - not_null
+      - name: bank_id
+        description: bank identifier
+        data_type: int
+        tests:
+          - not_null
+  - name: dim_entity
+    description: Dimension table of entities
+    columns:
+      - name: entity_id
+        description: entity unique identifier
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: entity_name
+        description: name of the entity
+        data_type: string
+        tests:
+          - not_null
+          - unique
+  - name: dim_payment_formats
+    description: Dimension table containing different payment formats and it's description
+    columns:
+      - name: payment_format
+        description: payment format
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: description
+        description: payment format description
+        data_type: string
+  - name: dim_currency
+    description: Dimension Currency table
+    columns:
+      - name: currency
+        description: currency name
+        data_type: string
+        tests:
+          - not_null
+          - unique
+  - name: dim_date
+    description: Dimension date-time table
+    columns:
+      - name: date_time_sk
+        description: timestamp used as surrogate key
+        data_type: timestamp
+        tests:
+          - not_null
+          - unique
+      - name: date
+        description: Date column with no timestamp
+        data_type: date
+        data_tests:
+          - not_null
+          - date_format
+      - name: hour
+        description: hour of the associated timestamp
+        data_type: int
+        data_tests:
+          - not_null
+          - hour_range
+      - name: minute
+        description: minute of the associated timestamp
+        data_type: int
+        data_tests:
+          - not_null
+          - minute_range
+      - name: day_name
+        description: Day name (e.g. Sun)
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      - name: is_weekend
+        description: Determines wether the day is weekend or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: week_of_year
+        description: number of week in the associated year
+        data_type: int
+        tests:
+          - not_null
+      - name: month
+        description: month number
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: month_name
+        description: month name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      - name: quarter
+        description: quarter where the month falls
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: year
+        description: Date year
+        data_type: int
+        tests:
+          - not_null
+  - name: dim_date_no_timestamp
+    description: Dimension date table WITH NO TIMESTAMP
+    columns:
+      - name: date_sk
+        description: date column used as surrogate key
+        data_type: date
+        tests:
+          - not_null
+          - unique
+          - date_format
+      - name: day_name
+        description: Day name (e.g. Sun)
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      - name: is_weekend
+        description: Determines wether the day is weekend or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: week_of_year
+        description: number of week in the associated year
+        data_type: int
+        tests:
+          - not_null
+      - name: month
+        description: month number
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: month_name
+        description: month name
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      - name: quarter
+        description: quarter where the month falls
+        data_type: int
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: year
+        description: Date year
+        data_type: int
+        tests:
+          - not_null
+  - name: fact_transactions
+    description: fact table includes monetary transactions
+    columns:
+      - name: transaction_sk
+        description: unique identifier of the transaction hash(from_account, to_account)
+        data_type: string
+        tests:
+          - not_null
+          - unique
+      - name: transaction_timestamp
+        description: timestamp of the transaction
+        data_type: timestamp
+        tests:
+          - not_null
+          - relationships:
+              field: date_time_sk
+              to: ref('dim_date')
+      - name: from_account_sk
+        description: hash(from_account, -, from_bank) identifier of the sender bank account
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: bank_account_surrogate_key
+              to: ref('dim_bank_accounts')
+      - name: from_account
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: from_bank
+        description: bank id
+        data_type: int
+        tests:
+          - not_null
+          - relationships:
+              field: bank_id
+              to: ref('dim_banks')
+      - name: to_account_sk
+        description: hash(to_account, -, to_bank) identifier of the receiving bank account
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: bank_account_surrogate_key
+              to: ref('dim_bank_accounts')
+      - name: to_account
+        description: account number
+        data_type: string
+        tests:
+          - not_null
+      - name: to_bank
+        description: bank id
+        data_type: int
+        tests:
+          - not_null
+          - relationships:
+              field: bank_id
+              to: ref('dim_banks')
+      - name: amount_received
+        description: monetary amount received by the receiver account
+        data_type: float
+        data_tests:
+          - not_null
+      - name: receiving_currency
+        description: currency in which monetary amount is received
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: currency
+              to: ref('dim_currency')
+      - name: amount_paid
+        description: monetary amount sent by the sender account
+        data_type: float
+        data_tests:
+          - not_null
+      - name: payment_currency
+        description: currency in which the sender sent the monetary amount
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: currency
+              to: ref('dim_currency')
+      - name: payment_format
+        description: transaction payment format
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+          - relationships:
+              field: payment_format
+              to: ref('dim_payment_formats')
+      - name: is_cross_currency
+        description: > 
+          determines if transaction currencies are different or not
+          True when payment_currency differs from receiving_currency.
+          Note: amount_paid and amount_received are often numerically
+          identical even when currencies differ — this reflects a
+          simplification in the source data generator, not a real
+          FX conversion. Do not aggregate amounts across currencies.
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_cross_border
+        description: determines if the transaction took place in the same bank
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: is_laundering
+        description: determines if the transaction is considered AML or not
+        data_type: boolean
+        tests:
+          - not_null
+          - accepted_values:
+              values: [TRUE, FALSE]
+      - name: pattern_group_id
+        description: laundering pattern which the transaction belongs to if it is considered AML
+        data_type: int
+        tests:
+          - relationships:
+              field: pattern_group_id
+              to: ref('dim_patterns')
+      - name: from_entity_id
+        description: sender bank entity id
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: entity_id
+              to: ref('dim_entity')
+      - name: to_entity_id
+        description: receiver bank entity id
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              field: entity_id
+              to: ref('dim_entity')
+  # marts
+  - name: account_activity_summary
+    description: table summarizes each bank account metrics but not monetary on each day
+    columns:
+      - name: bank_account_sk
+        description: bank account identifier
+        data_type: string
+        tests:
+          - not_null
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+      - name: transactions_sent
+        description: total transactions sent by a bank account on a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: transactions_received
+        description: total transactions received to a bank account on a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_counterparties_sent_to
+        description: number of unique bank accounts a bank account sent to (transferred money)
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_counterparties_received_from
+        description: number of unique bank accounts a bank account received from (received money)
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_banks_sent_to
+        description: number of unique banks a bank account transferred a monetary value to 
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: unique_banks_received_from
+        description: number of unique banks a bank account received a monetary value from
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: cross_currency_txn_count
+        description: Number of transactions sent or received involving a currency mismatch between the payer and the payee.
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: cross_border_txn_count
+        description: Number of transactions sent or received involved a different bank between the two sides
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_txn_count
+        description: number of transactions that were considered anti money laundering
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: is_flagged_account_day
+        description: boolean identifier of a day that a bank account did not get involved in a laundering behavior
+        data_type: boolean
+        tests:
+          - not_null
+      - name: distinct_payment_formats
+        description: number of unique payment formats a bank account interacted with in a day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: distinct_patterns_count
+        description: number of laundering patterns a bank account got involved into in a single day
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: account_currency_summary
+    description: table summarizes each bank account monetary ins and outs each day by a currency
+    columns:
+      - name: bank_account_sk
+        description: bank account identifier
+        data_type: string
+        tests:
+          - not_null
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        tests:
+          - not_null
+      - name: currency
+        description: currency in which a bank account sent or received a monetary value
+        data_type: string
+        tests:
+          - not_null
+      - name: amount_transferred
+        description: total monetary amount transferred
+        data_type: float
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: amount_received
+        description: total monetary amount received
+        data_type: float
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: net_flow
+        description: zero if a bank account sent and received same monetary amount in the same currency on the same idea
+        data_type: float
+        tests:
+          - not_null
+  - name: hourly_transaction_patterns
+    description: this table summarizes transaction metrics in each hour each day
+    columns:
+      - name: transaction_date
+        description: transaction date
+        data_type: date
+        data_tests:
+          - not_null
+          - date_format
+      - name: hour
+        description: hour of the day
+        data_type: int
+        data_tests:
+          - not_null
+          - hour_range
+      - name: total_transactions
+        description: total transactions made in an hour 
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: total laundering transactions
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: payment_format_analysis
+    description: summarization of each payment format with each associated metrics
+    columns:
+      - name: payment_format
+        description: payment format (e.g. Wire, ACH, etc....)
+        data_type: string
+        data_tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions made through a type of payment
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_count
+        description: total transactions that are considered anti money laundering made through a type of payment
+        data_type: int
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: laundering_rate
+        description: rate of transactions that are considered anti money laundering made through a type of payment
+        data_type: float
+        data_tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: bank_flow_matrix
+    description: one row per from_bank, to_bank, and currency. Shows transaction count
+      and total volume sent (in payment_currency) between each bank pair.
+      Powers the bank-to-bank flow visualization.
+    columns:
+      - name: from_bank_id
+        description: bank responsible for initiating the transaction
+        data_type: int
+        tests:
+          - not_null
+      - name: to_bank_id
+        description: bank receiving the transaction
+        data_type: int
+        tests:
+          - not_null
+      - name: currency
+        description: currency in which the transactions happen from the source bank
+        data_type: string
+        tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions made by the source bank
+        data_type: int
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: total_transferred
+        description: total monetary value transferred from the source bank in a associated currency
+        data_type: float
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+  - name: patterns_summary
+    description: >
+      Pattern-type-level rollup of laundering activity (count of groups,
+      transactions, avg chain length/duration).
+    columns:
+      - name: pattern_group_id
+        description: pattern group identifier
+        data_type: int
+        tests:
+          - not_null
+      - name: pattern_type
+        description: pattern type
+        data_type: string
+        tests:
+          - not_null
+      - name: pattern_metadata
+        description: pattern type meta data (extra info about the type if it has sub-type)
+        data_type: string
+      - name: payment_format
+        description: payment format
+        data_type: string
+        tests:
+          - accepted_values:
+              values: ["Reinvestment", "Credit Card", "Cash", "Bitcoin", "Cheque", "ACH", "Wire"]
+      - name: currency
+        description: currency in which these kind of laundering transactions transfer money (the one initiating the transfer)
+        data_type: string
+        tests:
+          - not_null
+      - name: total_transactions
+        description: total transactions by certain pattern, pattern sub-type (pattern_metadata), payment format and currency
+        data_type: int
+        tests:
+          - not_null
+          - numeric_value_at_least_zero
+      - name: chain_length
+        description: > 
+          number of transactions that are usually associated with a pattern type in order to achieve a laundering behavior
+          NOTE: in case of unclassified pattern type this would be -1
+        data_type: int
+        tests:
+          - not_null
+      - name: duration_days
+        description: > 
+          Duration in days that these transactions took in order to achieve laundering behavior
+          NOTE: in case of unclassified pattern type this would be -1
+        data_type: int
+        tests:
+          - not_null
+              

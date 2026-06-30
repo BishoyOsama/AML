@@ -7,3 +7,7 @@ dbt_aml\README.md
 env_dbt
 Datasets
 dbt_aml\dbt_packages
+BI.pbix
+airflow\dags\dbt\dbt_aml\.user.yml
+airflow\dags\dbt\dbt_aml\profiles.yml
+airflow\.env

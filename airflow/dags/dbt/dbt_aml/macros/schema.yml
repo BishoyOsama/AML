@@ -1,0 +1,13 @@
+version: 2
+
+macros:
+  - name: generate_sk_with_sep
+    description: macro to create hashed of value of any two values separated by '-'
+    arguments:
+      - name: column_one
+        type: string
+        description: first column to add to the hashing function left to '-'
+      - name: column_two
+        type: string
+        description: second column to add to the hashing function right to '-'
+      
