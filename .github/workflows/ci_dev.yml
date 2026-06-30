@@ -105,8 +105,8 @@ jobs:
                      --project-dir ./airflow/dags/dbt/dbt_aml/ \
                      --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
                      --select state:modified+ \
-                     --defer \
                      --state ./production_state \
+                     --defer \
                      --target dev
                 else
                     echo "No production manifest found - skipping tests on first dev push"
