@@ -36,26 +36,21 @@ models:
     # Config indicated by + and applies to all files under models/example/
     silver:
       +materialized: table
-      +database: "{{ target.database}}"
       +schema: SILVER
       +snowflake_warehouse: COMPUTE_WH
     gold:
       +materialized: table
-      +database: "{{ target.database}}"
       +schema: GOLD
       +snowflake_warehouse: COMPUTE_WH
     marts:
       +materialized: view
-      +database: AML
       +schema: MARTS
       +snowflake_warehouse: COMPUTE_WH
 seeds:
   dbt_aml:
     dim_payment_formats:
-      database: "{{ target.database}}"
       schema: GOLD
       snowflake_warehouse: COMPUTE_WH
     dim_currency:
-      database: "{{ target.database}}"
       schema: GOLD
       snowflake_warehouse: COMPUTE_WH

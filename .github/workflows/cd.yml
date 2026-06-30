@@ -75,6 +75,13 @@ jobs:
               run: dbt compile --project-dir ./airflow/dags/dbt/dbt_aml --profiles-dir ./airflow/dags/dbt/dbt_aml --target prod
             
 
+            - name: dbt seed - full production seed
+              run: |
+                dbt seed \
+                    --project-dir ./airflow/dags/dbt/dbt_aml/ \
+                    --profiles-dir ./airflow/dags/dbt/dbt_aml/ \
+                    --target prod
+
             - name: dbt run - full production run
               run: |
                 dbt run \
