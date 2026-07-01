@@ -19,7 +19,7 @@ profile_config = ProfileConfig(
     profile_mapping=SnowflakeUserPasswordProfileMapping(
         conn_id="snowflake-connection",
         profile_args={
-            "database": "AML",
+            "database": "AML_PROD",
             "warehouse": "COMPUTE_WH",
             "schema": "default"
             }
