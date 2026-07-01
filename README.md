@@ -134,8 +134,12 @@ Branch protection on `main` requires `dbt-slim-ci` and `airflow-gate` status che
 
 
 
+https://github.com/user-attachments/assets/d5a33d94-8b02-43b3-9d16-db7837d0461e
 
-The hourly heatmap is a custom DAX HTML measure using a log-scaled 7-step blue ramp — log scaling prevents a single peak-hour outlier from compressing all other cells into the bottom colour bucket.
+
+
+
+The hourly heatmap is a custom DAX HTML measure using a log-scaled 7-step blue ramp
 
 ---
 
